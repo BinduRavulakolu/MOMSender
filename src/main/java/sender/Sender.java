@@ -3,6 +3,7 @@ package sender;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -21,33 +22,31 @@ public class Sender {
 		}else {
 			System.out.println(args[0]);
 		}*/
-		ConnectionFactory connectionFactory;
+		ConnectionFactory connectionFactory=null;
 		Connection connection=null;
+		Queue queue=null;
 		try {
 			InitialContext initialContext =new InitialContext();
-			Queue queue =(Queue) initialContext.lookup("jms/P2PQueue");
-			connectionFactory=(QueueConnectionFactory) initialContext.lookup("jms/__defaultConnectionFactory");
+		    queue =(Queue) initialContext.lookup("jms/P2PQueue");
+			connectionFactory=(ConnectionFactory) initialContext.lookup("jms/__defaultConnectionFactory");
 			
-			connection= connectionFactory.createConnection();
+			/*connection= connectionFactory.createConnection();
 			Session session= connection.createSession( false, Session.AUTO_ACKNOWLEDGE);
 			
 			MessageProducer messageProducer =session.createProducer(queue);
 			TextMessage textmessage=session.createTextMessage("hello");
 			messageProducer.send(textmessage);
-			System.out.println("Message Produced");
+			System.out.println("Message Produced");*/
 					
 		}catch(NamingException e){
 			e.printStackTrace();
-		}catch(JMSException e){
-			e.printStackTrace();
-		}finally {
-			if(connection!=null)try
-			{
-				connection.close();
-			}catch (JMSException e) {
-			e.printStackTrace();
-			}
 		}
+		try(JMSContext context=connectionFactory.createContext()){
+
+		TextMessage message=context.createTextMessage("fgdyd");
+		context.createProducer().send(queue, message);
+		}
+		
 	}
 
 }
